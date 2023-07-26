@@ -38,7 +38,7 @@ interface IBroker is IComponent {
     event DutchTradeImplementationSet(ITrade indexed oldVal, ITrade indexed newVal);
     event BatchAuctionLengthSet(uint48 indexed oldVal, uint48 indexed newVal);
     event DutchAuctionLengthSet(uint48 indexed oldVal, uint48 indexed newVal);
-    event DisabledSet(TradeKind tradeKind, bool indexed prevVal, bool indexed newVal);
+    event DisabledSet(TradeKind indexed tradeKind, bool indexed prevVal, bool indexed newVal);
 
     // Initialization
     function init(
