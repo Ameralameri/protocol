@@ -67,7 +67,7 @@ abstract contract TradingP0 is RewardableP0, ITrading {
     ) internal returns (ITrade trade) {
         IBroker broker = main.broker();
         assert(address(trades[req.sell.erc20()]) == address(0));
-        require(!broker.disabled(), "broker disabled");
+        require(!broker.disabled(), "broker disabled for trade kind");
 
         req.sell.erc20().safeApprove(address(broker), 0);
         req.sell.erc20().safeApprove(address(broker), req.sellAmount);

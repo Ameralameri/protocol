@@ -2173,10 +2173,10 @@ describe(`Revenues - P${IMPLEMENTATION}`, () => {
         await backingManager.forwardRevenue([aaveToken.address])
         await expect(
           rsrTrader.manageTokens([aaveToken.address], [TradeKind.BATCH_AUCTION])
-        ).to.be.revertedWith('broker disabled')
+        ).to.be.revertedWith('broker disabled for trade kind')
         await expect(
           rTokenTrader.manageTokens([aaveToken.address], [TradeKind.BATCH_AUCTION])
-        ).to.be.revertedWith('broker disabled')
+        ).to.be.revertedWith('broker disabled for trade kind')
 
         // Check funds - remain in traders
         expect(await rsr.balanceOf(stRSR.address)).to.equal(0)

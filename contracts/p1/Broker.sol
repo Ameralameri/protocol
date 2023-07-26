@@ -110,7 +110,7 @@ contract BrokerP1 is ComponentP1, IBroker {
         TradeRequest memory req,
         TradePrices memory prices
     ) external returns (ITrade) {
-        require(!tradeKindDisabled[kind], "broker disabled");
+        require(!tradeKindDisabled[kind], "broker disabled for trade kind");
 
         address caller = _msgSender();
         require(

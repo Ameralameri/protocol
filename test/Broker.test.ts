@@ -401,7 +401,7 @@ describe(`BrokerP${IMPLEMENTATION} contract #fast`, () => {
       await whileImpersonating(backingManager.address, async (bmSigner) => {
         await expect(
           broker.connect(bmSigner).openTrade(TradeKind.DUTCH_AUCTION, tradeRequest, prices)
-        ).to.be.revertedWith('broker disabled')
+        ).to.be.revertedWith('broker disabled for trade kind')
       })
 
       // Re-enable Dutch Auctions, disable Batch Auctions
@@ -416,7 +416,7 @@ describe(`BrokerP${IMPLEMENTATION} contract #fast`, () => {
       await whileImpersonating(backingManager.address, async (bmSigner) => {
         await expect(
           broker.connect(bmSigner).openTrade(TradeKind.BATCH_AUCTION, tradeRequest, prices)
-        ).to.be.revertedWith('broker disabled')
+        ).to.be.revertedWith('broker disabled for trade kind')
       })
     })
 

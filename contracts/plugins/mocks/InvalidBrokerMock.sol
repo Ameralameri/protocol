@@ -47,7 +47,7 @@ contract InvalidBrokerMock is ComponentP0, IBroker {
         TradeRequest memory,
         TradePrices memory
     ) external view notTradingPausedOrFrozen returns (ITrade) {
-        require(!disabled, "broker disabled");
+        require(!disabled, "broker disabled for trade kind");
 
         // Revert when opening trades
         revert("Failure opening trade");

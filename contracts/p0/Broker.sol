@@ -71,7 +71,7 @@ contract BrokerP0 is ComponentP0, IBroker {
         TradeRequest memory req,
         TradePrices memory prices
     ) external returns (ITrade) {
-        require(!tradeKindDisabled[kind], "broker disabled");
+        require(!tradeKindDisabled[kind], "broker disabled for trade kind");
         assert(req.sellAmount > 0);
 
         address caller = _msgSender();
