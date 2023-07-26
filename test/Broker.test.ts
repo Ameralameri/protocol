@@ -384,13 +384,10 @@ describe(`BrokerP${IMPLEMENTATION} contract #fast`, () => {
 
   describe('Trade Management', () => {
     it('Should not allow to open trade if Disabled', async () => {
-      // Disable Broker
+      // Disable Dutch Auctions
       await expect(broker.connect(owner).setDisabled(TradeKind.DUTCH_AUCTION, true))
         .to.emit(broker, 'DisabledSet')
         .withArgs(TradeKind.DUTCH_AUCTION, false, true)
-      await expect(broker.connect(owner).setDisabled(TradeKind.BATCH_AUCTION, true))
-        .to.emit(broker, 'DisabledSet')
-        .withArgs(TradeKind.BATCH_AUCTION, false, true)
 
       // Attempt to open trade
       const tradeRequest: ITradeRequest = {
@@ -400,12 +397,25 @@ describe(`BrokerP${IMPLEMENTATION} contract #fast`, () => {
         minBuyAmount: bn('0'),
       }
 
+      // Dutch should fail
+      await whileImpersonating(backingManager.address, async (bmSigner) => {
+        await expect(
+          broker.connect(bmSigner).openTrade(TradeKind.DUTCH_AUCTION, tradeRequest, prices)
+        ).to.be.revertedWith('broker disabled')
+      })
+
+      // Re-enable Dutch Auctions, disable Batch Auctions
+      await expect(broker.connect(owner).setDisabled(TradeKind.DUTCH_AUCTION, false))
+        .to.emit(broker, 'DisabledSet')
+        .withArgs(TradeKind.DUTCH_AUCTION, true, false)
+      await expect(broker.connect(owner).setDisabled(TradeKind.BATCH_AUCTION, true))
+        .to.emit(broker, 'DisabledSet')
+        .withArgs(TradeKind.BATCH_AUCTION, false, true)
+
+      // Batch should fail
       await whileImpersonating(backingManager.address, async (bmSigner) => {
         await expect(
           broker.connect(bmSigner).openTrade(TradeKind.BATCH_AUCTION, tradeRequest, prices)
-        ).to.be.revertedWith('broker disabled')
-        await expect(
-          broker.connect(bmSigner).openTrade(TradeKind.DUTCH_AUCTION, tradeRequest, prices)
         ).to.be.revertedWith('broker disabled')
       })
     })
