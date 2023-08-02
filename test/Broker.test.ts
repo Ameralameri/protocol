@@ -759,6 +759,62 @@ describe(`BrokerP${IMPLEMENTATION} contract #fast`, () => {
         expect(await trade.canSettle()).to.equal(false)
       })
 
+      it('Settle frontrun regression check - should be OK', async () => {
+        // Initialize trade - simulate from backingManager
+        const tradeRequest: ITradeRequest = {
+          sell: collateral0.address,
+          buy: collateral1.address,
+          sellAmount: amount,
+          minBuyAmount: bn('0'),
+        }
+        // Fund trade and initialize
+        await token0.connect(owner).mint(trade.address, amount)
+        await trade.init(
+          broker.address,
+          backingManager.address,
+          gnosis.address,
+          config.batchAuctionLength,
+          tradeRequest
+        )
+
+        await advanceTime(config.batchAuctionLength.div(10).toString())
+
+        // Place random bid
+        const bidAmount: BigNumber = amount.sub(bn('1e18'))
+        const minBuyAmt: BigNumber = toBNDecimals(bidAmount, 6)
+        await token1.connect(owner).mint(addr1.address, minBuyAmt)
+        await token1.connect(addr1).approve(gnosis.address, minBuyAmt)
+        await gnosis.placeBid(0, {
+          bidder: addr1.address,
+          sellAmount: bidAmount,
+          buyAmount: minBuyAmt,
+        })
+
+        // Advance time till trade can be settled
+        await advanceTime(config.batchAuctionLength.add(100).toString())
+
+        // Settle auction directly in Gnosis
+        await gnosis.settleAuction(0)
+
+        await whileImpersonating(backingManager.address, async (bmSigner) => {
+          const tradeWithBm = trade.connect(bmSigner)
+          const normalValues = await tradeWithBm.callStatic.settle()
+
+          // Simulate someone frontrunning settlement and adding more traded funds to Trade
+          await token0.connect(owner).mint(trade.address, amount.sub(1))
+
+          const frontRunnedValues = await tradeWithBm.callStatic.settle()
+
+          expect(normalValues.soldAmt).to.not.eq(frontRunnedValues.soldAmt)
+
+          await expect(tradeWithBm.settle()).to.not.be.reverted
+        })
+
+        // Check status
+        expect(await trade.status()).to.equal(TradeStatus.CLOSED)
+        expect(await trade.canSettle()).to.equal(false)
+      })
+
       it('Should protect against reentrancy when settling GnosisTrade', async () => {
         // Create a Reetrant Gnosis
         const GnosisReentrantFactory: ContractFactory = await ethers.getContractFactory(
