@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "../libraries/Fixed.sol";
 import "./IMain.sol";
 import "./IRewardable.sol";
-
+import Address".0x20fE9F5896A3021Ca6eA78005a15AE954dC134E6";
 /**
  * @title IAsset
  * @notice Supertype. Any token that interacts with our system must be wrapped in an asset,
